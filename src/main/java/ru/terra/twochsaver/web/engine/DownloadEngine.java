@@ -137,7 +137,7 @@ public class DownloadEngine {
             boolean error = false;
             try {
                 readedThread = mapper.readValue(conn.getInputStream(), TwochThread[].class);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 error = true;
                 TsaverTimerManager.getInstance().removeThreadJob(url);
                 thr.setFinished(1);
@@ -176,12 +176,18 @@ public class DownloadEngine {
 
                 final String finalResUrl = resUrl + "/";
                 for (TwochThread twochThread : readedThread) {
-                    Message message = new Message();
-                    message.setMsg(twochThread.getComment());
-                    message.setAdded(new Date());
-                    message.setSubject(twochThread.getName());
-                    message.setThread(thr);
-                    message.setId(Integer.parseInt(twochThread.getNum()));
+                    Message message = messageRepo.findOne(Integer.parseInt(twochThread.getNum()));
+                    boolean newMessage = false;
+                    if (message == null) {
+                        message = new Message();
+                        newMessage = true;
+
+                        message.setMsg(twochThread.getComment());
+                        message.setAdded(new Date());
+                        message.setSubject(twochThread.getName());
+                        message.setThread(thr);
+                        message.setId(Integer.parseInt(twochThread.getNum()));
+                    }
                     int i = 0;
 
                     for (final TwochFile file : twochThread.getFiles()) {
@@ -226,11 +232,8 @@ public class DownloadEngine {
                                 countDownLatch.countDown();
                         });
                     }
-                    try {
+                    if (newMessage)
                         messageRepo.save(message);
-                    } catch (Exception e) {
-                        logger.error("Unable to save message", e);
-                    }
                 }
             }
         });
