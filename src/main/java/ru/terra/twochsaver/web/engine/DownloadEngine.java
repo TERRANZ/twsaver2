@@ -174,7 +174,6 @@ public class DownloadEngine {
                 new File(folderName).mkdirs();
                 new Thread(() -> addBtSyncFolder(folderName)).start();
 
-                final String finalResUrl = resUrl + "/";
                 for (TwochThread twochThread : readedThread) {
                     Message message = messageRepo.findOne(Integer.parseInt(twochThread.getNum()));
                     boolean newMessage = false;
@@ -191,7 +190,7 @@ public class DownloadEngine {
                     int i = 0;
 
                     for (final TwochFile file : twochThread.getFiles()) {
-                        final String finalImageUrl = finalResUrl + file.getPath();
+                        final String finalImageUrl = "https://2ch.hk" + file.getPath();
                         switch (i) {
                             case 0: {
                                 message.setImage1(finalImageUrl);
